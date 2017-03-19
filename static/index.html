@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+﻿<!DOCTYPE HTML>
 <html> 
   <head> 
     <title>Websockets Assignment</title> 
@@ -52,6 +52,7 @@ function drawCircle(context,entity) {
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
+        globalAlpha = Math.random(); // Because I liked the strobing effect from last time
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
         arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
@@ -125,6 +126,10 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    // JS Websocket Guide - Using JSON to transmit objects
+    // Ref: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+    // Author Mozzila
+    socket.send(JSON.stringify(world)); // Tell the server to update all its listeners
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -254,6 +259,8 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        // We can ask if there is anything to draw upon opening the socket
+        drawFrame();
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +268,21 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here? 
+            // We need to update our world and draw the frames as the server sends the updates
+            console.log(msg.data)
+            var data = msg.data;
+            for (var key in data) {
+                // Add the new entry if it does not exist in my current world
+                // OR
+                // Update an existing entry in my current world
+                // World remains static if these two conditions are false.
+                if (!(key in world) || world[key] != data[key]) {
+                    world[key] = data[key]
+                    drawNextFrame(); // New entry added that we need to draw.
+                    update(); // Update my world.
+                }              
+            }
         } catch (e) {
             alert("socket on message: " + e);
         }
