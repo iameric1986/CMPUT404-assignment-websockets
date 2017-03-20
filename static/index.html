@@ -61,12 +61,43 @@ function drawCircle(context,entity) {
     }
 }
 
+// Not epilepsy friendly
+function oppositeColors(entity) {
+	switch (entity["colour"]) {
+		case 'blue':
+			entity["colour"] = 'orange';
+			break;
+		case 'orange':
+			entity["colour"] = 'purple';
+			break;
+		case 'purple':
+			entity["colour"] = 'yellow';
+			break;
+		case 'yellow':
+			entity["colour"] = 'pink';
+			break;
+		case 'pink':
+			entity["colour"] = 'green';
+			break;
+		case 'green':
+			entity["colour"] = 'red';
+			break;
+		case 'red':
+			entity["colour"] = 'blue';
+			break;
+		default:
+			entity["colour"] = 'blue';
+	}
+	return entity;
+}
+
 function prepEntity(entity) {
-    if (!entity["colour"]) {
-        entity["colour"] = "#FF0000";
-    }
+    //if (entity["colour"] == 'blue') {
+    //    entity["colour"] = 'orange';
+    //}
+	oppositeColors(entity);
     if (!entity["radius"]) {
-        entity["radius"] = 50;
+        entity["radius"] = 25;
     }
     return entity;
 }
@@ -125,12 +156,12 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
-    //XXX: Send a XHTML Request that updates the entity you just modified!
-    // JS Websocket Guide - Using JSON to transmit objects
+	// JS Websocket Guide - Using JSON to transmit objects
     // Ref: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
     // Author Mozzila
-    socket.send(JSON.stringify(world)); // Tell the server to update all its listeners
+	socket.send(JSON.stringify(world)); // Tell the server to update all its listeners. Should happen before we draw.
+    drawNextFrame(); // (but should we?)
+    //XXX: Send a XHTML Request that updates the entity you just modified!    
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -236,6 +267,7 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
+// I added the simple opposite color stuff in a new function further up.
 mouse.mousedowners.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
 });
@@ -260,8 +292,18 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
-        // We can ask if there is anything to draw upon opening the socket
-        drawFrame();
+        //We can ask if there is anything to draw upon opening the socket
+		//Need to request information about the current state of the world first.
+		//I tried to do it in an async manner with jQuery, but if I set the source for the script, everything else breaks. So I did it using normal JS.
+		var xhr = new XMLHttpRequest();
+		var worldURL = "ws://"+host+"/world";
+		xhr.open("GET", worldURL, true);
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4 && xhr.status === 200) {
+				world = JSON.parse(xhr.responseText);
+				drawFrame();
+			}
+		}
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);

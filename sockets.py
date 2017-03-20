@@ -80,7 +80,7 @@ clients = list()
 # Author: Abram Hindle
 def send_all(msg):
     for client in clients:
-        client.put(msg)
+        client.put_nowait(msg)
 
 # Send all objects as json
 # Ref: https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
@@ -98,7 +98,7 @@ myWorld.add_set_listener( set_listener )
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return flask.redirect('/static/index.html')
+    return redirect('/static/index.html')
 
 # Read the message from the web socket as per in-class example
 # We need to update the world instead of just sending the message back to all listeners
@@ -117,7 +117,7 @@ def read_ws(ws,client):
                 for entity, data in packet.iteritems():
                     # Update the world and do something with the update
                     myWorld.set(entity, data) 
-                    set_listener(entity, data)
+                    #set_listener(entity, data)
             else:
                 break
     except:
