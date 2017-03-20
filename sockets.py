@@ -117,7 +117,8 @@ def read_ws(ws,client):
                 # We are loading the message as json, so we can iterate over it
                 for entity, data in packet.iteritems():
                     # Update the world and do something with the update
-                    myWorld.set(entity, data) 
+                    myWorld.set(entity, data)
+                    set_listener(entity, data)
             else:
                 break
     except:
