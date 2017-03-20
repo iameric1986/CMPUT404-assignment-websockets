@@ -92,8 +92,8 @@ function oppositeColors(entity) {
 }
 
 function prepEntity(entity) {
-    //if (entity["colour"] == 'blue') {
-    //    entity["colour"] = 'orange';
+    //if (!entity["colour"]) {
+    //    entity["colour"] = '#FF0000';
     //}
 	oppositeColors(entity);
     if (!entity["radius"]) {
@@ -296,16 +296,14 @@ function wsSetup() {
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
         //We can ask if there is anything to draw upon opening the socket
-		//Need to request information about the current state of the world first.
-		//I tried to do it in an async manner with jQuery, but if I set the source for the script, everything else breaks. So I did it using normal JS.
-		//debug("WebSocket opened");
+		//Looks like this doesn't do anything. The client needs to be sent the state of the world via a web socket when they connect. So when a new socket gets assigned, the server needs to send the current state of the world immediately after.
 		//var xhr = new XMLHttpRequest();
 		//var worldURL = "ws://"+host+"/world";
 		//xhr.open("GET", worldURL, true);
 		//xhr.onreadystatechange = function() {
 		//	if (xhr.readyState === 4 && xhr.status === 200) {
 		//		world = JSON.parse(xhr.responseText); // Set the world based on the JSON we get back
-				drawFrame();
+		drawFrame();
 		//	}
 		//}
     };
@@ -325,13 +323,14 @@ function wsSetup() {
                 // Update an existing entry in my current world
                 // World remains static if these two conditions are false.
                 if (!(key in world) || world[key] != data[key]) {
-                    //world[key] = data[key]
-                    //drawNextFrame(); // New entry added that we need to draw.
-                    //update(); // Update my world.
+                    world[key] = data[key]
+                    drawNextFrame(); // New entry added that we need to draw.
+                    update(); // Update my world.
 					// There is already a function for this.  And I'm not sending on sockets here.
-					addEntity(key, data[key]);
-					update();
-                }              
+					// Apparently if I call addEntity it lags the shit out of the web app. Most likely because I'm constantly sending over the socket when i don't need to.
+					// The most listeners will indirectly send over the socket, so I don't need to explicitly do it.
+					//addEntity(key, data[key]);
+                }
             }
         } catch (e) {
             alert("socket on message: " + e);

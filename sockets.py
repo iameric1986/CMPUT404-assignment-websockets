@@ -135,8 +135,11 @@ def subscribe_socket(ws):
     client = Client()
     clients.append(client)
     g = gevent.spawn(read_ws, ws, client)
+    # I want to get the current state of the world if I'm a new client, but only if the world has anything in it.
+    if (myWorld.world()):
+        currentWorld = json.dumps(myWorld.world())
+        ws.send(currentWorld)
     try:
-        ws.send(json.dumps(myWorld.world()))
         while True:
             msg = client.get()
             print('Got a message')
