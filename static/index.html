@@ -162,7 +162,7 @@ function addEntity(entity, data) {
 	var newEntity = {};
 	newEntity[entity] = data;
 	// JS Websocket Guide - Using JSON to transmit objects
-    // Ref: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+    	// Ref: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
     // Author Mozzila
 	socket.send(JSON.stringify(newEntity));
 }

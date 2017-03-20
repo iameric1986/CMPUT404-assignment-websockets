@@ -57,3 +57,24 @@ Contributors
 
 * Mark Galloway
 * Abram Hindle
+* Eric Cheng
+
+References
+==========
+* Reference (Retrieved March 19, 2017)
+	Websocket setup and handling
+	URL: https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
+	Author: Abram Hindle
+* Reference (Used in Assignment 4)
+	Thread: Iterating Through A JSON Object
+	URL: http://stackoverflow.com/questions/2733813/iterating-through-a-json-object
+	Author: tzot
+* Reference (Retrieved March 19, 2017)
+	JS Websocket Guide - Using JSON to transmit objects
+	URL: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+	Author: Mozzila
+* Reference (Used in Assignment 4)
+	Canvas Properties
+	URL: https://www.w3schools.com/tags/ref_canvas.asp
+	Author: w3schools
+* The implementation of Flask REST functions were taken from my (Eric Cheng) implementation in assignment 4
