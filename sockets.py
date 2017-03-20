@@ -117,7 +117,7 @@ def read_ws(ws,client):
                 for entity, data in packet.iteritems():
                     # Update the world and do something with the update
                     myWorld.set(entity, data) 
-                    #set_listener(entity, data)
+                    set_listener(entity, data)
             else:
                 break
     except:
@@ -134,7 +134,7 @@ def subscribe_socket(ws):
     # XXX: TODO IMPLEMENT ME
     client = Client()
     clients.append(client)
-    g = gevent.spawn(read_ws, read_ws, client)
+    g = gevent.spawn(read_ws, ws, client)
     try:
         while True:
             msg = client.get()
