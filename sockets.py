@@ -80,7 +80,7 @@ clients = list()
 # Author: Abram Hindle
 def send_all(msg):
     for client in clients:
-        client.put_nowait(msg)
+        client.put(msg)
 
 # Send all objects as json
 # Ref: https://github.com/abramhindle/WebSocketsExamples/blob/master/broadcaster.py
@@ -90,6 +90,7 @@ def send_all_json(obj):
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+    update = {}
     update[entity] = data
     send_all_json(update)
     
@@ -117,7 +118,6 @@ def read_ws(ws,client):
                 for entity, data in packet.iteritems():
                     # Update the world and do something with the update
                     myWorld.set(entity, data) 
-                    set_listener(entity, data)
             else:
                 break
     except:
@@ -136,6 +136,7 @@ def subscribe_socket(ws):
     clients.append(client)
     g = gevent.spawn(read_ws, ws, client)
     try:
+        ws.send(json.dumps(myWorld.world()))
         while True:
             msg = client.get()
             print('Got a message')
@@ -175,7 +176,7 @@ def update(entity):
     '''update the entities via this interface'''
     entity_data = flask_post_json()
     if (len(entity_data) == 0):
-        print("No data")
+        #print("No data")
         return None
 
     if (request.method == 'POST'): # Update the world if the request is a POST
@@ -189,6 +190,7 @@ def update(entity):
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
+    print("Sending the world")
     '''you should probably return the world here'''
     return jsonify(myWorld.world())
 

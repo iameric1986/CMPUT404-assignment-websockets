@@ -156,12 +156,15 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
+    drawNextFrame(); // (but should we?)
+    //XXX: Send a XHTML Request that updates the entity you just modified!
+	// Send only the new entities to the listeners
+	var newEntity = {};
+	newEntity[entity] = data;
 	// JS Websocket Guide - Using JSON to transmit objects
     // Ref: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
     // Author Mozzila
-	socket.send(JSON.stringify(world)); // Tell the server to update all its listeners. Should happen before we draw.
-    drawNextFrame(); // (but should we?)
-    //XXX: Send a XHTML Request that updates the entity you just modified!    
+	socket.send(JSON.stringify(newEntity));
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -295,15 +298,16 @@ function wsSetup() {
         //We can ask if there is anything to draw upon opening the socket
 		//Need to request information about the current state of the world first.
 		//I tried to do it in an async manner with jQuery, but if I set the source for the script, everything else breaks. So I did it using normal JS.
-		var xhr = new XMLHttpRequest();
-		var worldURL = "ws://"+host+"/world";
-		xhr.open("GET", worldURL, true);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4 && xhr.status === 200) {
-				world = JSON.parse(xhr.responseText); // Set the world based on the JSON we get back
+		//debug("WebSocket opened");
+		//var xhr = new XMLHttpRequest();
+		//var worldURL = "ws://"+host+"/world";
+		//xhr.open("GET", worldURL, true);
+		//xhr.onreadystatechange = function() {
+		//	if (xhr.readyState === 4 && xhr.status === 200) {
+		//		world = JSON.parse(xhr.responseText); // Set the world based on the JSON we get back
 				drawFrame();
-			}
-		}
+		//	}
+		//}
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -314,16 +318,19 @@ function wsSetup() {
             //XXX: TODO What are you going to do here? 
             // We need to update our world and draw the frames as the server sends the updates
             //console.log(msg.data)
-            var data = msg.data;
+            var data = JSON.parse(msg.data);
             for (var key in data) {
                 // Add the new entry if it does not exist in my current world
                 // OR
                 // Update an existing entry in my current world
                 // World remains static if these two conditions are false.
                 if (!(key in world) || world[key] != data[key]) {
-                    world[key] = data[key]
-                    drawNextFrame(); // New entry added that we need to draw.
-                    update(); // Update my world.
+                    //world[key] = data[key]
+                    //drawNextFrame(); // New entry added that we need to draw.
+                    //update(); // Update my world.
+					// There is already a function for this.  And I'm not sending on sockets here.
+					addEntity(key, data[key]);
+					update();
                 }              
             }
         } catch (e) {
